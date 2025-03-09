@@ -9,7 +9,8 @@ import org.springframework.http.HttpStatus;
 
 import java.util.List;
 
-@CrossOrigin(origins = "http://localhost:5173")
+//@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/users")
 public class UserController {
@@ -36,5 +37,17 @@ public class UserController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build(); // HTTP 400 Bad Request
         }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteUser(@PathVariable Long id){
+        userService.deleteUserById(id);
+        return ResponseEntity.ok("User deleted successfully");
+    }
+
+    @DeleteMapping("/all")
+    public ResponseEntity<String> deleteAllUsers(){
+        userService.deleteAllUsers();
+        return ResponseEntity.ok("User deleted successfully");
     }
 }

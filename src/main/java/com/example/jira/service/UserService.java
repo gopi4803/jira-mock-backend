@@ -4,7 +4,6 @@ import com.example.jira.model.User;
 import com.example.jira.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 
 import java.util.List;
@@ -12,12 +11,10 @@ import java.util.List;
 @Service
 public class UserService {
     private final UserRepository userRepository;
-    private final BCryptPasswordEncoder passwordEncoder;
 
     @Autowired
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
-        this.passwordEncoder = new BCryptPasswordEncoder();
     }
 
     public List<User> getAllUsers() {
@@ -29,7 +26,6 @@ public class UserService {
             if (userRepository.findByUsernameIgnoreCase(user.getUsername()).isPresent()) {
                 throw new RuntimeException("Username already taken!");
             }
-            user.setPassword(passwordEncoder.encode(user.getPassword()));
 
             return userRepository.save(user);
         } catch (Exception e) {
@@ -37,4 +33,11 @@ public class UserService {
         }
     }
 
+    public void deleteUserById(Long id) {
+        userRepository.deleteById(id);
+    }
+
+    public void deleteAllUsers() {
+        userRepository.deleteAll();
+    }
 }
