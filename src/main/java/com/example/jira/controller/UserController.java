@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 
 import java.util.List;
+import java.util.Optional;
 
 //@CrossOrigin(origins = "http://localhost:5173")
 @CrossOrigin(origins = "*")
@@ -29,13 +30,24 @@ public class UserController {
         return ResponseEntity.ok(users); // HTTP 200 OK
     }
 
-    @PostMapping
+    @PostMapping("/signup")
     public ResponseEntity<User> createUser(@RequestBody User user) {
         try {
             User savedUser = userService.saveUser(user);
             return ResponseEntity.status(HttpStatus.CREATED).body(savedUser); // HTTP 201 Created
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build(); // HTTP 400 Bad Request
+        }
+    }
+
+    @GetMapping("/email/{email}")
+    public ResponseEntity<?> getUserByEmail(@PathVariable String email){
+        Optional<User> user = userService.getUserByEmail(email);
+
+        if(user.isPresent()){
+            return ResponseEntity.ok(user.get());
+        }else{
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         }
     }
 
