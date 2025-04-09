@@ -2,22 +2,29 @@ package com.example.jira.controller;
 
 import com.example.jira.model.User;
 import com.example.jira.service.UserService;
+import com.example.jira.service.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AuthenticationManager;
 
 import java.util.List;
 import java.util.Optional;
 
-//@CrossOrigin(origins = "http://localhost:5173")
+//@CrossOrigin(origins = "http://localhost:5174")
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/users")
 public class UserController {
 
     private final UserService userService;
-
+    @Autowired
+    private  AuthenticationManager authenticationManager;
+    @Autowired
+    private  JwtService jwtService;
     @Autowired
     public UserController(UserService userService) {
         this.userService = userService;
@@ -39,6 +46,25 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build(); // HTTP 400 Bad Request
         }
     }
+
+    @PostMapping("/login")
+    public ResponseEntity<String> login(@RequestBody User user) {
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword())
+            );
+
+            if (authentication.isAuthenticated()) {
+                String token = jwtService.generateToken(user.getEmail());
+                return ResponseEntity.ok(token);
+            }
+
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+        }
+    }
+
 
     @GetMapping("/email/{email}")
     public ResponseEntity<?> getUserByEmail(@PathVariable String email){
